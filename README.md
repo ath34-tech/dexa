@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../logo.png" alt="Dexa AI Logo" width="300"/>
+  <img src="./logo.png" alt="Dexa AI Logo" width="300"/>
   <h1>Dexa AI</h1>
   <p><strong>Autonomous Data Engineering & Machine Learning Agent</strong></p>
 </div>
