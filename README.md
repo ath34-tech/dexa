@@ -1,59 +1,436 @@
 <div align="center">
-  <img src="./logo.png" alt="Dexa AI Logo" width="300"/>
-  <h1>Dexa AI</h1>
-  <p><strong>Autonomous Data Engineering & Machine Learning Agent</strong></p>
+  <img src="./logo.png" alt="Dexa Logo" width="300"/>
+  <h1>Dexa</h1>
+  <p><strong>Terminal-First Agentic AI Copilot for Machine Learning Engineers</strong></p>
+  <p>
+    <img alt="Python" src="https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python"/>
+    <img alt="LangGraph" src="https://img.shields.io/badge/Orchestration-LangGraph-green?style=flat-square"/>
+    <img alt="License" src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square"/>
+  </p>
 </div>
-
-## Overview
-**Dexa** is an advanced, terminal-native conversational AI designed to autonomously execute direct tabular data manipulation, statistical analysis, and complex visualization routing. Instead of acting as a standard code-generating assistant, Dexa operates as a live executor—generating bespoke Python frameworks on the fly, evaluating standard actions against `.csv`/`.parquet`/`.xlsx` schemas, and persistently writing structural mutations seamlessly back into your actual source files without intermediate manual coding steps.
-
-### Core Architecture
-- **Real-time Syncing:** Actions such as column generation or missing-value imputation write intelligently straight back to the original hard-drive source format.
-- **Dynamic Data Visualization:** Dexa evaluates highly complex plotting requests natively, generating aesthetic graphics (e.g. `query_id.png`) uniquely tagged to your active operational context in real-time.
-- **Local Context Window Scaling:** Designed to continuously digest iterative commands over prolonged analytical sessions without overflowing the neural inference length.
 
 ---
 
-## 🛠 Developer Installation
+## What is Dexa?
 
-Ensure your Python environment handles Pandas, Matplotlib, LangGraph, and Typer out-of-the-box.
+**Dexa** is NOT a chatbot. NOT a simple code generator. NOT just another AutoML wrapper.
+
+Dexa is a **terminal-first, agentic AI copilot** built specifically for Machine Learning Engineers who do not want to manually handle repetitive data science and data engineering work.
+
+Think of Dexa as an **intelligent ML teammate** that can think, plan, execute, evaluate, and improve its own decisions — step by step.
+
+> **Query → Understand → Plan → Execute → Reflect → Adapt → Respond**
+
+---
+
+## Core Capabilities
+
+Dexa helps you:
+
+- 📊 **Analyze datasets** — summaries, statistics, distributions
+- 🔗 **Understand feature relationships** — correlations, dependencies
+- 🔍 **Detect data quality issues** — missing values, skewness, outliers, imbalance, leakage
+- 🔧 **Suggest preprocessing steps** — imputation, encoding, scaling strategies
+- 🤖 **Recommend models** — matched to your task and data profile
+- 📈 **Suggest evaluation metrics** — appropriate for your problem type
+- ⚙️ **Generate ML pipelines** — lightweight, actionable, end-to-end
+- 🩺 **Diagnose ML problems** — low accuracy, overfitting, data leakage, bad feature selection
+- 🪜 **Execute step-by-step** — instead of giving one-shot answers
+
+---
+
+## Design Philosophy
+
+Dexa is built around one core idea: **reduce manual effort before model training**.
+
+Every action Dexa takes follows these principles:
+
+- ✅ Think before acting
+- ✅ Break tasks into smaller executable steps
+- ✅ Execute only one step at a time
+- ✅ Evaluate the result of each step
+- ✅ Decide whether to continue, replan, or stop
+- ✅ Prefer deterministic tools over hallucinated code
+- ✅ Give actionable ML insights instead of generic summaries
+
+---
+
+## Architecture
+
+Dexa is built on a **modular multi-agent architecture** orchestrated by **LangGraph**.
+
+### Agents
+
+| Agent | Role |
+|---|---|
+| `IntentAgent` | Understands what the user wants |
+| `GoalAgent` | Handles goal-oriented tasks (prediction, regression, forecasting, etc.) |
+| `PlannerAgent` | Breaks tasks into small, executable steps |
+| `ExecutionAgent` | Chooses how to perform each step (tool or code) |
+| `ReflectionAgent` | Evaluates whether the step succeeded |
+| `ReasoningAgent` | Synthesizes findings and recommendations |
+| `ResponseAgent` | Formats the final response |
+| `ProfilerAgent` | Understands dataset characteristics |
+| `VisualizationAgent` | Decides whether and what to visualize |
+
+### LangGraph Flow
+
+Dexa is controlled by a **LangGraph state machine**, not a linear orchestrator.
+
+```
+Intent → Goal → Planner → Step → Execution → Reflection → Step Control
+```
+
+After **Step Control**, Dexa dynamically decides what to do next based on `ReflectionAgent` output:
+
+```json
+{
+  "decision": "continue | replan | stop",
+  "reason": "...",
+  "issues": [],
+  "confidence": 0.0
+}
+```
+
+Dexa is **adaptive** — it can change strategy mid-execution without user intervention.
+
+---
+
+## Execution System
+
+### Tool-First Approach
+
+Dexa always **prefers deterministic tools** over LLM-generated code.
+
+`ExecutionAgent` outputs one of two formats:
+
+**Tool usage (preferred):**
+```json
+{
+  "type": "tool",
+  "tool_name": "describe_data",
+  "args": {}
+}
+```
+
+**Fallback code generation:**
+```json
+{
+  "type": "code",
+  "code": "df['income_per_age'] = df['income'] / df['age']"
+}
+```
+
+Code is only generated when no existing tool fits the task.
+
+### Built-in Tools
+
+Dexa ships with deterministic tools for common ML tasks:
+
+- Dataset summary & profiling
+- Missing value detection
+- Feature statistics
+- Correlation heatmaps
+- Histogram plotting
+- Linear model training
+- Data quality checks
+- Outlier & skewness detection
+
+### Code Execution
+
+For complex or unsupported tasks, `ExecutionAgent` can generate and safely execute Python code using:
+
+- `pandas` · `numpy` · `matplotlib` · `seaborn`
+- `sklearn` · `scipy` · `statsmodels`
+
+The **Executor** runs this code in a controlled environment, capturing stdout, return values, and errors — and feeding results back into Dexa's state.
+
+---
+
+## Visualization
+
+Visualization is **lightweight and tool-based**.
+
+`VisualizationAgent` only decides:
+- Whether visualization is useful
+- Which chart type is appropriate
+- Which columns to visualize
+
+```json
+{
+  "should_visualize": true,
+  "plot_type": "histogram",
+  "column": "price"
+}
+```
+
+`ExecutionAgent` then converts this into a tool call or plotting code. Supported chart types include: histograms, correlation heatmaps, scatter plots, box plots, and feature distributions.
+
+---
+
+## Installation
+
+Choose the installation method that works best for you.
+
+---
+
+### Option 1 — pip (Standard)
+
+> Recommended for developers and ML engineers who already have Python 3.10+ installed.
 
 ```bash
-git clone https://github.com/your-username/dexa.git
+# Clone the repository
+git clone https://github.com/ath34-tech/dexa.git
 cd dexa
+
+# Install in editable mode
 pip install -e .
 ```
 
+**Requirements:** Python 3.10+, pip
+
 ---
 
-## 🚀 Public Usage (Standalone Binary)
-For end-users handling large tabular structures without native programming experience, Dexa operates via a completely packaged Windows executable. Note that because Dexa writes Python dynamically, specific dependencies (e.g., `seaborn`, `scikit-learn`) must be available on the host machine if testing extreme custom ML.
+### Option 2 — Standalone Executable (Windows)
 
-1. **Download:** Navigate to the `dist/` folder and launch `Dexa.exe` directly natively.
-2. **Access Data:** Place the executable in any accessible location.
+> No Python installation required. Download and run immediately.
 
-### Primary Commands
+1. Go to the [**Releases**](https://github.com/ath34-tech/dexa/releases) page
+2. Download the latest `Dexa.exe` from the Assets section
+3. Place `Dexa.exe` in any folder you prefer (e.g. `C:\Tools\dexa\`)
+4. Add that folder to your system `PATH` so you can run `dexa` from any terminal
+5. Open a terminal and verify:
 
-1. **Authentication Configuration**
-Set your LLM credentials centrally to securely power the brain.
-```bash
-dexa config --groq-key your_groq_api_key_here
+```cmd
+dexa --help
 ```
 
-2. **Load Dataset**
-Lock your session onto a local tabular file to synchronize it intelligently.
+> **Note:** Advanced ML operations (e.g. custom sklearn pipelines, seaborn plots) may require the relevant Python packages to be present on your machine.
+
+---
+
+### Option 3 — uv (Fast Python Toolchain)
+
+> Recommended if you use [uv](https://github.com/astral-sh/uv) as your Python package manager.
+
 ```bash
-dexa load-file C:/path/to/your/custom_dataset.csv
+# Install uv if you haven't already
+curl -Ls https://astral.sh/uv/install.sh | sh
+
+# Clone and install Dexa
+git clone https://github.com/your-username/dexa.git
+cd dexa
+
+# Create a virtual environment and install
+uv venv
+uv pip install -e .
+
+# Activate the environment
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
 ```
 
-3. **Engage the Agent**
-Enter the continuous operation framework to begin executing data models textually.
+> `uv` is significantly faster than pip for dependency resolution and installation.
+
+---
+
+## Configuration
+
+Before using Dexa, set your Groq API key (used to power the LLM brain):
+
 ```bash
+dexa config --groq-key YOUR_GROQ_API_KEY
+```
+
+Your key is stored locally and reused across sessions.
+
+---
+
+## CLI Reference
+
+Dexa is **terminal-first**. It feels like a powerful developer tool, not a chat application.
+
+| Command | Description |
+|---|---|
+| `dexa config --groq-key KEY` | Set your Groq API key |
+| `dexa load-file <path>` | Load a dataset into the session |
+| `dexa analyze <file>` | Run a full dataset analysis |
+| `dexa profile <file>` | Generate a detailed data profile |
+| `dexa diagnose "<problem>"` | Diagnose a specific ML problem |
+| `dexa pipeline --target <col>` | Generate a pipeline for a target column |
+| `dexa chat` | Start an interactive agentic session |
+
+---
+
+## Usage Tutorial
+
+This tutorial walks you through a complete Dexa workflow — from loading your data to getting actionable ML insights.
+
+### Step 1 — Set Your API Key
+
+```bash
+dexa config --groq-key YOUR_GROQ_API_KEY
+```
+
+This only needs to be done once. Dexa stores the key locally for future sessions.
+
+---
+
+### Step 2 — Profile Your Dataset
+
+Get a high-level understanding of your data before doing anything else.
+
+```bash
+dexa profile data.csv
+```
+
+Dexa will report:
+- Row and column counts
+- Data types per feature
+- Missing value counts and percentages
+- Skewness and outlier flags
+- Class imbalance warnings (for classification targets)
+
+---
+
+### Step 3 — Analyze the Dataset
+
+Run a deeper analysis to detect quality issues and understand feature relationships.
+
+```bash
+dexa analyze data.csv
+```
+
+Dexa will:
+- Summarize feature distributions
+- Detect correlations between columns
+- Flag potential data leakage
+- Highlight redundant or low-variance features
+
+---
+
+### Step 4 — Diagnose ML Problems
+
+Already have a model but something feels off? Tell Dexa what's wrong.
+
+```bash
+dexa diagnose "low accuracy"
+dexa diagnose "model is overfitting"
+dexa diagnose "features don't seem useful"
+dexa diagnose "training and test scores are very different"
+```
+
+Dexa will reason through the problem, identify likely causes, and suggest concrete next steps.
+
+---
+
+### Step 5 — Generate an ML Pipeline
+
+Tell Dexa which column you want to predict and it will generate a full pipeline suggestion.
+
+```bash
+dexa pipeline --target price
+dexa pipeline --target churn
+dexa pipeline --target sales_volume
+```
+
+Dexa will recommend:
+- Preprocessing steps (imputation, encoding, scaling)
+- A suitable model for the task type
+- Appropriate evaluation metrics
+- A lightweight, runnable pipeline structure
+
+---
+
+### Step 6 — Start an Interactive Session
+
+For multi-turn, exploratory analysis, load your file and enter the chat mode.
+
+```bash
+dexa load-file path/to/dataset.csv
 dexa chat
 ```
 
-## Example Operations
-Inside the chat engine, simply converse aggressively:
-- *"Calculate an R-squared multi-variable regression predicting revenue based directly on the other numeric data constraints."*
-- *"Fill all NaN elements under my target_column immediately using a generalized mean extrapolation."*
-- *"Identify the two most heavily correlated distributions in my matrix and map them together via an elegant Seaborn scatter correlation plot overlay, saving it safely generated via my query ID."*
+Inside the interactive session, ask Dexa anything:
+
+```
+> What features are most correlated with the target column?
+> Detect missing values and suggest imputation strategies.
+> Why might my model be overfitting?
+> Recommend a model for this regression task.
+> Plot the distribution of the price column.
+> Identify the top 5 most important features.
+> Is there any data leakage in this dataset?
+> What preprocessing steps should I apply before training?
+> Show me a correlation heatmap of all numeric columns.
+> Flag any outliers in the age column.
+```
+
+Dexa will **think, plan, execute step-by-step, reflect on each result**, and adapt its strategy — all autonomously.
+
+---
+
+### Full Workflow Example
+
+```bash
+# 1. Configure once
+dexa config --groq-key sk-...
+
+# 2. Profile the raw dataset
+dexa profile housing.csv
+
+# 3. Run a full analysis
+dexa analyze housing.csv
+
+# 4. Generate a pipeline for your target
+dexa pipeline --target house_price
+
+# 5. Jump into interactive mode for deeper exploration
+dexa load-file housing.csv
+dexa chat
+```
+
+```
+[Dexa] Loaded housing.csv — 1,460 rows × 81 columns
+[Dexa] Thinking...
+
+> What are the most important features for predicting house_price?
+
+[Dexa] Planning → Profiling features → Running correlation analysis → Evaluating skewness
+[Dexa] Top correlated features: OverallQual (0.79), GrLivArea (0.71), GarageCars (0.64)
+[Dexa] Recommendation: Consider log-transforming GrLivArea (skew: 1.27)
+```
+
+---
+
+## Future Vision
+
+- 🧠 Richer memory and session continuity
+- 🔧 Expanded deterministic toolset
+- 🤖 AutoML-lite pipelines
+- 📊 Experiment tracking integration
+- 🔎 Advanced visualization reasoning
+- 🖥️ VS Code extension
+- 🩺 Enhanced diagnosis mode
+- 🔀 More advanced LangGraph routing
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Orchestration | LangGraph |
+| CLI | Typer |
+| Data | pandas, numpy |
+| ML | scikit-learn, scipy, statsmodels |
+| Visualization | matplotlib, seaborn |
+| LLM Backend | Groq (configurable) |
+
+---
+
+<div align="center">
+  <sub>Built for ML Engineers who want to move faster — without cutting corners.</sub>
+</div>
