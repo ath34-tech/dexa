@@ -238,29 +238,207 @@ source .venv/bin/activate
 
 ## Configuration
 
-Before using Dexa, set your Groq API key (used to power the LLM brain):
+Before running Dexa, configure your credentials. You can set them once with `dexa config` and they will be persisted to a local `.env` file for all future sessions.
 
 ```bash
+# Set your Groq API key (required)
 dexa config --groq-key YOUR_GROQ_API_KEY
+
+# Optionally set a specific Groq model
+dexa config --model-name llama-3.1-8b-instant
+
+# Optionally configure Kaggle credentials (for dataset downloads)
+dexa config --kaggle-username YOUR_KAGGLE_USERNAME --kaggle-key YOUR_KAGGLE_KEY
 ```
 
-Your key is stored locally and reused across sessions.
+All values are saved to `.env` at the project root and automatically reloaded on the next run.
 
 ---
 
 ## CLI Reference
 
-Dexa is **terminal-first**. It feels like a powerful developer tool, not a chat application.
+Dexa is **terminal-first**. Every command is designed to feel like a developer tool, not a chat app.
 
-| Command | Description |
-|---|---|
-| `dexa config --groq-key KEY` | Set your Groq API key |
-| `dexa load-file <path>` | Load a dataset into the session |
-| `dexa analyze <file>` | Run a full dataset analysis |
-| `dexa profile <file>` | Generate a detailed data profile |
-| `dexa diagnose "<problem>"` | Diagnose a specific ML problem |
-| `dexa pipeline --target <col>` | Generate a pipeline for a target column |
-| `dexa chat` | Start an interactive agentic session |
+### `dexa config`
+
+Persist credentials and settings to the local `.env` file.
+
+```bash
+dexa config [OPTIONS]
+
+Options:
+  --groq-key TEXT          Set your Groq API key
+  --model-name TEXT        Set the Groq model to use (e.g. llama-3.1-8b-instant)
+  --kaggle-username TEXT   Set your Kaggle username
+  --kaggle-key TEXT        Set your Kaggle API key
+```
+
+---
+
+### `dexa load-file`
+
+Load a local dataset (CSV, Parquet, or Excel) into the session context.
+
+```bash
+dexa load-file path/to/dataset.csv
+dexa load-file path/to/dataset.parquet
+dexa load-file path/to/dataset.xlsx
+```
+
+> `dexa load-data` is an alias for the same command.
+
+---
+
+### `dexa load-kaggle`
+
+Download and load a dataset directly from Kaggle.
+
+```bash
+dexa load-kaggle username/dataset-name
+
+# Optionally pass credentials inline
+dexa load-kaggle username/dataset-name --username YOUR_USERNAME --key YOUR_KAGGLE_KEY
+```
+
+Kaggle credentials can also be pre-set via `dexa config`.
+
+---
+
+### `dexa chat`
+
+Start an interactive agentic session. This is the main command for querying Dexa.
+
+```bash
+dexa chat
+
+# Optionally override credentials for this session only
+dexa chat --api-key YOUR_GROQ_API_KEY
+dexa chat --model-name llama-3.1-8b-instant
+dexa chat --kaggle-username YOUR_USERNAME --kaggle-key YOUR_KEY
+```
+
+Once inside the session, type any natural language question and Dexa will think, plan, execute, reflect, and respond.
+
+Type `exit` or `quit` to end the session.
+
+---
+
+## Usage Tutorial
+
+This tutorial walks you through a real end-to-end Dexa workflow.
+
+---
+
+### Step 1 — Configure Credentials
+
+Run this once. Your settings are saved and reused in every future session.
+
+```bash
+dexa config --groq-key YOUR_GROQ_API_KEY
+```
+
+To also set a model and Kaggle access:
+
+```bash
+dexa config \
+  --groq-key YOUR_GROQ_API_KEY \
+  --model-name llama-3.1-8b-instant \
+  --kaggle-username YOUR_USERNAME \
+  --kaggle-key YOUR_KAGGLE_KEY
+```
+
+---
+
+### Step 2 — Load Your Dataset
+
+#### From a local file:
+
+```bash
+dexa load-file path/to/housing.csv
+```
+
+#### From Kaggle:
+
+```bash
+dexa load-kaggle ath34-tech/housing-prices-dataset
+```
+
+Dexa will confirm the file is loaded and ready for querying.
+
+---
+
+### Step 3 — Start a Chat Session
+
+```bash
+dexa chat
+```
+
+You'll see the Dexa prompt:
+
+```
+Welcome to Dexa AI! Type 'exit' to quit.
+
+>>
+```
+
+From here, ask anything about your data in plain English.
+
+---
+
+### Step 4 — Query Dexa
+
+Inside the chat session, Dexa handles everything through natural language. Some example queries:
+
+```
+>> What does this dataset look like? Summarize its structure.
+>> Are there any missing values? How should I handle them?
+>> What features are most correlated with the target column?
+>> Is there any risk of data leakage in this dataset?
+>> Detect any outliers in the price column.
+>> What model would you recommend for a regression task on this data?
+>> What preprocessing steps should I apply before training?
+>> Show me a correlation heatmap of all numeric features.
+>> Why might a model trained on this data be overfitting?
+>> Generate a lightweight ML pipeline for predicting house_price.
+```
+
+Dexa will **think → plan → execute step-by-step → reflect → adapt**, all without you writing a single line of code.
+
+---
+
+### Full Workflow Example
+
+```bash
+# Step 1: Configure once
+dexa config --groq-key sk-your-key-here --model-name llama-3.1-8b-instant
+
+# Step 2: Load a local dataset
+dexa load-file housing.csv
+
+# Step 3: Enter the chat session
+dexa chat
+```
+
+```
+Welcome to Dexa AI! Type 'exit' to quit.
+
+>> What are the most important features for predicting house_price?
+
+ Thinking...
+
+Dexa AI:
+┌─────────────────────────────────────────────────────────────────┐
+│ Based on correlation analysis:                                  │
+│                                                                 │
+│ Top features correlated with house_price:                       │
+│  • OverallQual  → 0.79                                          │
+│  • GrLivArea    → 0.71  (⚠ skewed, consider log-transform)     │
+│  • GarageCars   → 0.64                                          │
+│  • TotalBsmtSF  → 0.61                                          │
+│                                                                 │
+│ Recommendation: Apply log1p to GrLivArea before training.       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
